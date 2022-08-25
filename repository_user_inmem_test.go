@@ -8,7 +8,7 @@ import (
 
 func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
 	type fields struct {
-		data []repositoryUserInmemSingle
+		data []*repositoryUserInmemSingle
 	}
 	type args struct {
 		username string
@@ -26,7 +26,7 @@ func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
 			return testStruct{
 				name: "runs",
 				fields: fields{
-					data: []repositoryUserInmemSingle{{username}},
+					data: []*repositoryUserInmemSingle{{username}},
 				},
 				args: args{username},
 			}

@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type repositoryFactoryInmemSingle struct {
 	username string
 	kind     string
@@ -8,7 +10,7 @@ type repositoryFactoryInmemSingle struct {
 }
 
 type repositoryFactoryInmem struct {
-	data []repositoryFactoryInmemSingle
+	data []*repositoryFactoryInmemSingle
 }
 
 func (repo *repositoryFactoryInmem) GetByUsername(username string) ([]Factory, error) {
@@ -47,7 +49,7 @@ func (repo *repositoryFactoryInmem) GetByUsername(username string) ([]Factory, e
 }
 
 func (repo *repositoryFactoryInmem) CreateFactory(factory Factory, username string) (bool, error) {
-	repo.data = append(repo.data, repositoryFactoryInmemSingle{
+	repo.data = append(repo.data, &repositoryFactoryInmemSingle{
 		username: username,
 		kind:     factory.GetKind(),
 		total:    factory.GetTotal(),
@@ -64,7 +66,9 @@ func (repo *repositoryFactoryInmem) PatchFactory(factory Factory, username strin
 		}
 
 		val.kind = factory.GetKind()
+		fmt.Println(" TOTAL!!!", factory.GetTotal())
 		val.total = factory.GetTotal()
+		fmt.Println(" AFTER TOTAL!!!", val.total)
 		val.level = factory.GetLevel()
 	}
 
@@ -72,7 +76,7 @@ func (repo *repositoryFactoryInmem) PatchFactory(factory Factory, username strin
 }
 
 func (repo *repositoryFactoryInmem) RemoveFactoriesFromUser(username string) (bool, error) {
-	newData := []repositoryFactoryInmemSingle{}
+	newData := []*repositoryFactoryInmemSingle{}
 
 	for _, val := range repo.data {
 		if val.username == username {
@@ -88,7 +92,7 @@ func (repo *repositoryFactoryInmem) RemoveFactoriesFromUser(username string) (bo
 }
 
 func (repo *repositoryFactoryInmem) RemoveFactory(factory Factory, username string) (bool, error) {
-	newData := []repositoryFactoryInmemSingle{}
+	newData := []*repositoryFactoryInmemSingle{}
 
 	for _, val := range repo.data {
 		if val.username == username && val.kind == factory.GetKind() {
@@ -105,7 +109,7 @@ func (repo *repositoryFactoryInmem) RemoveFactory(factory Factory, username stri
 
 func createRepositoryFactoryInmem() (RepositoryFactory, error) {
 	repo := repositoryFactoryInmem{
-		data: []repositoryFactoryInmemSingle{},
+		data: []*repositoryFactoryInmemSingle{},
 	}
 
 	return &repo, nil

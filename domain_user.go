@@ -49,8 +49,8 @@ func (u *User) UpgradeResource(kind string) (bool, error) {
 
 func createUser(username string, userRepository RepositoryUser, factoryRepository RepositoryFactory) (bool, error) {
 	// check if the user was created already
-	if dbUser, _ := userRepository.GetUserByUsername(username); len(dbUser.Username) > 0 {
-		return false, nil
+	if dbUser, _ := userRepository.GetUserByUsername(username); dbUser.Username == username {
+		return false, errors.New("user already exists")
 	}
 
 	var user User

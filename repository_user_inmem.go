@@ -5,12 +5,12 @@ type repositoryUserInmemSingle struct {
 }
 
 type RepositoryUserInmem struct {
-	data              []repositoryUserInmemSingle
+	data              []*repositoryUserInmemSingle
 	factoryRepository RepositoryFactory
 }
 
 func (repo *RepositoryUserInmem) GetUserByUsername(username string) (User, error) {
-	user := User{username, []Factory{}, repo, repo.factoryRepository}
+	user := User{"", []Factory{}, repo, repo.factoryRepository}
 
 	for _, val := range repo.data {
 		if val.username == username {
@@ -23,13 +23,13 @@ func (repo *RepositoryUserInmem) GetUserByUsername(username string) (User, error
 }
 
 func (repo *RepositoryUserInmem) CreateUser(user User) (bool, error) {
-	repo.data = append(repo.data, repositoryUserInmemSingle{user.GetUsername()})
+	repo.data = append(repo.data, &repositoryUserInmemSingle{user.GetUsername()})
 	return true, nil
 }
 
 func createRepositoryUserInmem(factoryRepo RepositoryFactory) (RepositoryUser, error) {
 	repositoryUser := RepositoryUserInmem{
-		data:              []repositoryUserInmemSingle{},
+		data:              []*repositoryUserInmemSingle{},
 		factoryRepository: factoryRepo,
 	}
 

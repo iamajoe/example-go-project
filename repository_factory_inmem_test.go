@@ -103,11 +103,23 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 		factory  Factory
 		username string
 	}
-	tests := []struct {
+	type testStruct struct {
 		name string
 		args args
-	}{
-		// TODO: Add test cases.
+	}
+
+	tests := []testStruct{
+		func() testStruct {
+			factory := newCopperFactory(func() {})
+
+			return testStruct{
+				name: "runs",
+				args: args{
+					factory:  &factory,
+					username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				},
+			}
+		}(),
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -117,16 +129,18 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 			}
 
 			// prepare
-			factory := newCopperFactory(func() {})
-			_, err = repo.CreateFactory(&factory, tt.args.username)
+			_, err = repo.CreateFactory(tt.args.factory, tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			// change total factory
+			// change total factory by creating a new one
+			factory := newCopperFactory(func() {})
+			factory.Kind = tt.args.factory.GetKind()
+			factory.Level = tt.args.factory.GetLevel()
 			factory.Total = 10
 
-			got, err := repo.PatchFactory(tt.args.factory, tt.args.username)
+			got, err := repo.PatchFactory(&factory, tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}
