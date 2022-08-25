@@ -10,7 +10,7 @@ var (
 )
 
 type repositoryFactorySqlite struct {
-	db DBSqlite
+	db *DBSqlite
 }
 
 func (repo *repositoryFactorySqlite) GetByUsername(username string) ([]Factory, error) {
@@ -103,7 +103,7 @@ func (repo *repositoryFactorySqlite) RemoveFactory(factory Factory, username str
 	return true, err
 }
 
-func createRepositoryFactorySqlite(db DBSqlite) (RepositoryFactory, error) {
+func createRepositoryFactorySqlite(db *DBSqlite) (RepositoryFactory, error) {
 	repo := repositoryFactorySqlite{db}
 
 	factorySqliteMutex.Lock()

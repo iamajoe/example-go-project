@@ -61,7 +61,7 @@ func createUser(username string, userRepository RepositoryUser, factoryRepositor
 
 			if err != nil {
 				// TODO: should probably have other way to notify the error
-				fmt.Errorf("error patching user: %v", err)
+				fmt.Printf("ERR: error patching user %s: %v \n", username, err)
 			}
 		}
 	}

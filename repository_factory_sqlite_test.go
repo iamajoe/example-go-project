@@ -13,7 +13,7 @@ func TestFactoryRepositorySqlite_GetByUsername(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -59,7 +59,7 @@ func TestFactoryRepositorySqlite_CreateFactory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -126,7 +126,7 @@ func TestFactoryRepositorySqlite_PatchFactory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -203,7 +203,7 @@ func TestFactoryRepositorySqlite_RemoveFactoriesFromUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -274,7 +274,7 @@ func TestFactoryRepositorySqlite_RemoveFactory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -348,7 +348,7 @@ func Test_createRepositoryFactorySqlite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	tests := []struct {

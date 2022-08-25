@@ -12,22 +12,26 @@ type DBSqlite struct {
 	db *sql.DB
 }
 
-func ConnectSQLite(file string) (DBSqlite, error) {
+func (db *DBSqlite) Close() error {
+	return db.db.Close()
+}
+
+func ConnectSQLite(file string) (*DBSqlite, error) {
 	// create the file if doesnt exist
 	if _, err := os.Stat(file); errors.Is(err, os.ErrNotExist) {
 		file, err := os.Create(file)
 		if err != nil {
-			return DBSqlite{}, err
+			return nil, err
 		}
 		file.Close()
 	}
 
 	db, err := sql.Open("sqlite3", file)
 	if err != nil {
-		return DBSqlite{nil}, err
+		return nil, err
 	}
 
-	return DBSqlite{db}, nil
+	return &DBSqlite{db}, nil
 
 	// defer db.Close()
 

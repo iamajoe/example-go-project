@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type repositoryFactoryInmemSingle struct {
 	username string
 	kind     string
@@ -66,9 +64,7 @@ func (repo *repositoryFactoryInmem) PatchFactory(factory Factory, username strin
 		}
 
 		val.kind = factory.GetKind()
-		fmt.Println(" TOTAL!!!", factory.GetTotal())
 		val.total = factory.GetTotal()
-		fmt.Println(" AFTER TOTAL!!!", val.total)
 		val.level = factory.GetLevel()
 	}
 

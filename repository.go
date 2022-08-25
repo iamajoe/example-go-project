@@ -8,7 +8,7 @@ type Repositories struct {
 
 func (r *Repositories) Close() {
 	if r.db != nil {
-		r.db.db.Close()
+		r.db.Close()
 	}
 }
 
@@ -17,12 +17,12 @@ func initDBRepos(db *DBSqlite) (Repositories, error) {
 		return Repositories{}, nil
 	}
 
-	userRepo, err := createRepositoryUserSqlite(*db)
+	userRepo, err := createRepositoryUserSqlite(db)
 	if err != nil {
 		return Repositories{}, err
 	}
 
-	factoryRepo, err := createRepositoryFactorySqlite(*db)
+	factoryRepo, err := createRepositoryFactorySqlite(db)
 	if err != nil {
 		return Repositories{}, err
 	}
@@ -54,5 +54,5 @@ func initRepos(isInmem bool) (Repositories, error) {
 		return Repositories{}, err
 	}
 
-	return initDBRepos(&db)
+	return initDBRepos(db)
 }

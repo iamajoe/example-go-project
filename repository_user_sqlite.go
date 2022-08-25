@@ -10,7 +10,7 @@ var (
 )
 
 type RepositoryUserSqlite struct {
-	db DBSqlite
+	db *DBSqlite
 }
 
 func (repo *RepositoryUserSqlite) GetUserByUsername(username string) (User, error) {
@@ -42,7 +42,7 @@ func (repo *RepositoryUserSqlite) CreateUser(user User) (bool, error) {
 	return true, err
 }
 
-func createRepositoryUserSqlite(db DBSqlite) (RepositoryUser, error) {
+func createRepositoryUserSqlite(db *DBSqlite) (RepositoryUser, error) {
 	repositoryUser := RepositoryUserSqlite{db}
 
 	userSqliteMutex.Lock()

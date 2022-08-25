@@ -13,7 +13,7 @@ func TestRepositoryUserSqlite_GetUserByUsername(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -69,7 +69,7 @@ func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	type args struct {
@@ -132,7 +132,7 @@ func Test_createRepositoryUserSqlite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.db.Close()
+	defer db.Close()
 	defer os.Remove(path)
 
 	tests := []struct {
