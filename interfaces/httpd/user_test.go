@@ -1,4 +1,4 @@
-package main
+package httpd
 
 import (
 	"bytes"
@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/joesantosio/simple-game-api/domains/user"
+	"github.com/joesantosio/simple-game-api/infrastructure/inmem"
 )
 
 func TestReqCreateUser(t *testing.T) {
-	repos, err := initInmemRepos()
+	repos, err := inmem.InitRepos()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +39,7 @@ func TestReqCreateUser(t *testing.T) {
 		t.Errorf("body = %v, want %v", rec.Body.String(), "true")
 	}
 
-	user, err := repos.user.GetUserByUsername(username)
+	user, err := repos.User.GetUserByUsername(username)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,14 +54,14 @@ func TestReqCreateUser(t *testing.T) {
 }
 
 func TestReqGetDashboard(t *testing.T) {
-	repos, err := initInmemRepos()
+	repos, err := inmem.InitRepos()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer repos.Close()
 
 	username := fmt.Sprintf("%d", rand.Intn(10000))
-	_, err = createUser(username, repos.user, repos.factory)
+	_, err = user.CreateUser(username, repos.User, repos.Factory)
 	if err != nil {
 		t.Fatal(err)
 	}

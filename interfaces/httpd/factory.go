@@ -1,12 +1,16 @@
-package main
+package httpd
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/joesantosio/simple-game-api/domains/factory"
+	"github.com/joesantosio/simple-game-api/domains/user"
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
-func reqUpgradeFactory(repos Repositories) func(w http.ResponseWriter, r *http.Request) {
+func reqUpgradeFactory(repos *infrastructure.Repositories) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
 			http.Error(w, "not allwowed", http.StatusMethodNotAllowed)
@@ -14,7 +18,7 @@ func reqUpgradeFactory(repos Repositories) func(w http.ResponseWriter, r *http.R
 		}
 
 		username := r.URL.Query().Get("username")
-		user, err := getUserByUsername(username, repos.user, repos.factory)
+		_, err := user.GetUserByUsername(username, repos.User)
 		if err != nil {
 			// TODO: what error should we have here??
 			handleResponse(w, http.StatusBadRequest, nil, err)
@@ -28,7 +32,7 @@ func reqUpgradeFactory(repos Repositories) func(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		ok, err := user.UpgradeResource(bodyResource["kind"])
+		ok, err := factory.UpgradeUserResource(username, bodyResource["kind"], repos.User, repos.Factory)
 		if err != nil {
 			// TODO: what error should we have here??
 			handleResponse(w, http.StatusBadRequest, nil, err)

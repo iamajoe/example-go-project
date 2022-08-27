@@ -1,20 +1,22 @@
-package main
+package sqlite
 
 import (
 	"fmt"
 	"sync"
+
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
 var (
-	factorySqliteMutex sync.Mutex
+	factoryMutex sync.Mutex
 )
 
-type repositoryFactorySqlite struct {
-	db *DBSqlite
+type repositoryFactory struct {
+	db *DB
 }
 
-func (repo *repositoryFactorySqlite) GetByUsername(username string) ([]Factory, error) {
-	factories := []Factory{}
+func (repo *repositoryFactory) GetByUsername(username string) ([]infrastructure.Factory, error) {
+	factories := []infrastructure.Factory{}
 
 	// TODO: shouldnt use sprintf but a lib to make sure that we don't have security issues
 	rows, err := repo.db.db.Query(
@@ -35,36 +37,15 @@ func (repo *repositoryFactorySqlite) GetByUsername(username string) ([]Factory, 
 			return nil, err
 		}
 
-		var factory Factory
-		switch kind {
-		case "iron":
-			factory = &IronFactory{
-				Kind:  kind,
-				Total: total,
-				Level: level,
-			}
-		case "copper":
-			factory = &CopperFactory{
-				Kind:  kind,
-				Total: total,
-				Level: level,
-			}
-		case "gold":
-			factory = &GoldFactory{
-				Kind:  kind,
-				Total: total,
-				Level: level,
-			}
-		}
-
+		factory := infrastructure.NewFactory(kind, total, level)
 		factories = append(factories, factory)
 	}
 
 	return factories, nil
 }
 
-func (repo *repositoryFactorySqlite) CreateFactory(factory Factory, username string) (bool, error) {
-	factorySqliteMutex.Lock()
+func (repo *repositoryFactory) CreateFactory(factory infrastructure.Factory, username string) (bool, error) {
+	factoryMutex.Lock()
 
 	sts := "INSERT INTO factories VALUES(?, ?, ?, ?);"
 	_, err := repo.db.db.Exec(sts, username, factory.GetKind(), factory.GetTotal(), factory.GetLevel())
@@ -72,13 +53,13 @@ func (repo *repositoryFactorySqlite) CreateFactory(factory Factory, username str
 		return false, err
 	}
 
-	factorySqliteMutex.Unlock()
+	factoryMutex.Unlock()
 
 	return true, err
 }
 
-func (repo *repositoryFactorySqlite) PatchFactory(factory Factory, username string) (bool, error) {
-	factorySqliteMutex.Lock()
+func (repo *repositoryFactory) PatchFactory(factory infrastructure.Factory, username string) (bool, error) {
+	factoryMutex.Lock()
 
 	sts := "UPDATE factories SET total=?, level=? WHERE username=? AND kind=?"
 	_, err := repo.db.db.Exec(sts, factory.GetTotal(), factory.GetLevel(), username, factory.GetKind())
@@ -86,34 +67,34 @@ func (repo *repositoryFactorySqlite) PatchFactory(factory Factory, username stri
 		return false, err
 	}
 
-	factorySqliteMutex.Unlock()
+	factoryMutex.Unlock()
 
 	return true, err
 }
 
-func (repo *repositoryFactorySqlite) RemoveFactoriesFromUser(username string) (bool, error) {
+func (repo *repositoryFactory) RemoveFactoriesFromUser(username string) (bool, error) {
 	sts := "DELETE FROM factories WHERE username=?"
 	_, err := repo.db.db.Exec(sts, username)
 	return true, err
 }
 
-func (repo *repositoryFactorySqlite) RemoveFactory(factory Factory, username string) (bool, error) {
+func (repo *repositoryFactory) RemoveFactory(factory infrastructure.Factory, username string) (bool, error) {
 	sts := "DELETE FROM factories WHERE username=? AND kind=?"
 	_, err := repo.db.db.Exec(sts, username, factory.GetKind())
 	return true, err
 }
 
-func createRepositoryFactorySqlite(db *DBSqlite) (RepositoryFactory, error) {
-	repo := repositoryFactorySqlite{db}
+func createRepositoryFactory(db *DB) (infrastructure.RepositoryFactory, error) {
+	repo := repositoryFactory{db}
 
-	factorySqliteMutex.Lock()
+	factoryMutex.Lock()
 
 	// TODO: should have an id
 	// TODO: should have a reference to the users table
 	sts := "CREATE TABLE IF NOT EXISTS factories(username TEXT, kind TEXT, total INTEGER, level INTEGER);"
 	_, err := repo.db.db.Exec(sts)
 
-	factorySqliteMutex.Unlock()
+	factoryMutex.Unlock()
 
 	return &repo, err
 }

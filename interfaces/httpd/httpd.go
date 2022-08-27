@@ -1,10 +1,13 @@
-package main
+package httpd
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
 func handleResponse(w http.ResponseWriter, code int, data interface{}, err error) {
@@ -42,16 +45,24 @@ func handleResponse(w http.ResponseWriter, code int, data interface{}, err error
 	w.Write(r)
 }
 
-func initServer(repos Repositories) {
+func InitServer(address string, repos *infrastructure.Repositories) {
 	sm := http.NewServeMux()
 
 	sm.HandleFunc("/user", reqCreateUser(repos))
 	sm.HandleFunc("/dashboard", reqGetDashboard(repos))
 	sm.HandleFunc("/factory/upgrade", reqUpgradeFactory(repos))
 
-	fmt.Println("listening at :4040")
-	err := http.ListenAndServe(":4040", sm)
+	srv := &http.Server{
+		Addr:         address,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  120 * time.Second,
+		Handler:      sm,
+	}
+
+	fmt.Printf("listening at %s \n", address)
+	err := srv.ListenAndServe()
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("server failed to start: %v", err)
 	}
 }

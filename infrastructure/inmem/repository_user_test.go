@@ -1,14 +1,16 @@
-package main
+package inmem
 
 import (
 	"fmt"
 	"math/rand"
 	"testing"
+
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
-func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
+func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 	type fields struct {
-		data []*repositoryUserInmemSingle
+		data []*repositoryUserSingle
 	}
 	type args struct {
 		username string
@@ -26,7 +28,7 @@ func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
 			return testStruct{
 				name: "runs",
 				fields: fields{
-					data: []*repositoryUserInmemSingle{{username}},
+					data: []*repositoryUserSingle{{username}},
 				},
 				args: args{username},
 			}
@@ -34,10 +36,8 @@ func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			factoryRepo, _ := createRepositoryFactoryInmem()
-			repo := &RepositoryUserInmem{
-				data:              tt.fields.data,
-				factoryRepository: factoryRepo,
+			repo := &repositoryUser{
+				data: tt.fields.data,
 			}
 			got, err := repo.GetUserByUsername(tt.args.username)
 
@@ -53,9 +53,9 @@ func TestRepositoryUserInmem_GetUserByUsername(t *testing.T) {
 	}
 }
 
-func TestRepositoryUserInmem_CreateUser(t *testing.T) {
+func TestRepositoryUser_CreateUser(t *testing.T) {
 	type args struct {
-		user User
+		user infrastructure.User
 	}
 	type testStruct struct {
 		name string
@@ -64,9 +64,8 @@ func TestRepositoryUserInmem_CreateUser(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			user := User{
-				Username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
-			}
+			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
+			user := infrastructure.NewUser(username)
 
 			return testStruct{
 				name: "runs",
@@ -76,13 +75,7 @@ func TestRepositoryUserInmem_CreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			factoryRepo, _ := createRepositoryFactoryInmem()
-
-			repo := &RepositoryUserInmem{
-				factoryRepository: factoryRepo,
-			}
-			tt.args.user.factoryRepository = factoryRepo
-			tt.args.user.userRepository = repo
+			repo := &repositoryUser{}
 
 			got, err := repo.CreateUser(tt.args.user)
 			if err != nil {
@@ -96,14 +89,14 @@ func TestRepositoryUserInmem_CreateUser(t *testing.T) {
 
 			// run
 			gotUser, err := repo.GetUserByUsername(tt.args.user.GetUsername())
-			if gotUser.Username != tt.args.user.GetUsername() {
-				t.Errorf("RepositoryUser.GetByUsername() = %v, want %v", gotUser.Username, tt.args.user.GetUsername())
+			if gotUser.GetUsername() != tt.args.user.GetUsername() {
+				t.Errorf("RepositoryUser.GetByUsername() = %v, want %v", gotUser.GetUsername(), tt.args.user.GetUsername())
 			}
 		})
 	}
 }
 
-func Test_createRepositoryUserInmem(t *testing.T) {
+func Test_createRepositoryUser(t *testing.T) {
 	tests := []struct {
 		name string
 	}{
@@ -111,15 +104,14 @@ func Test_createRepositoryUserInmem(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			factoryRepo, _ := createRepositoryFactoryInmem()
-			got, err := createRepositoryUserInmem(factoryRepo)
+			got, err := createRepositoryUser()
 			if err != nil {
 				t.Fatal(err)
 				return
 			}
 
 			if got == nil {
-				t.Errorf("createRepositoryUserInmem() = %v, want %v", got, nil)
+				t.Errorf("createRepositoryUser() = %v, want %v", got, nil)
 			}
 		})
 	}

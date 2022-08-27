@@ -1,31 +1,46 @@
-package main
+package inmem
 
 import (
 	"fmt"
 	"math/rand"
 	"testing"
+
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
-func TestFactoryRepositoryInmem_GetByUsername(t *testing.T) {
+func TestFactoryRepository_GetByUsername(t *testing.T) {
+	type fields struct {
+		factory infrastructure.Factory
+	}
 	type args struct {
 		username string
 	}
 	tests := []struct {
-		name string
-		args args
+		name   string
+		fields fields
+		args   args
 	}{
-		{"runs", args{fmt.Sprintf("tmp_user_%d", rand.Intn(100000))}},
+		{
+			name: "runs",
+			fields: fields{
+				factory: infrastructure.NewFactory(
+					fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+					10,
+					11,
+				),
+			},
+			args: args{fmt.Sprintf("tmp_user_%d", rand.Intn(100000))},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryFactoryInmem()
+			repo, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			// prepare
-			factory := newCopperFactory(func() {})
-			_, err = repo.CreateFactory(&factory, tt.args.username)
+			_, err = repo.CreateFactory(tt.fields.factory, tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -43,9 +58,9 @@ func TestFactoryRepositoryInmem_GetByUsername(t *testing.T) {
 	}
 }
 
-func TestFactoryRepositoryInmem_CreateFactory(t *testing.T) {
+func TestFactoryRepository_CreateFactory(t *testing.T) {
 	type args struct {
-		factory  Factory
+		factory  infrastructure.Factory
 		username string
 	}
 	type testStruct struct {
@@ -55,12 +70,16 @@ func TestFactoryRepositoryInmem_CreateFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := newCopperFactory(func() {})
+			factory := infrastructure.NewFactory(
+				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				10,
+				11,
+			)
 
 			return testStruct{
 				name: "runs",
 				args: args{
-					factory:  &factory,
+					factory:  factory,
 					username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
 				},
 			}
@@ -68,7 +87,7 @@ func TestFactoryRepositoryInmem_CreateFactory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryFactoryInmem()
+			repo, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -98,9 +117,9 @@ func TestFactoryRepositoryInmem_CreateFactory(t *testing.T) {
 	}
 }
 
-func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
+func TestFactoryRepository_PatchFactory(t *testing.T) {
 	type args struct {
-		factory  Factory
+		factory  infrastructure.Factory
 		username string
 	}
 	type testStruct struct {
@@ -110,12 +129,16 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := newCopperFactory(func() {})
+			factory := infrastructure.NewFactory(
+				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				10,
+				11,
+			)
 
 			return testStruct{
 				name: "runs",
 				args: args{
-					factory:  &factory,
+					factory:  factory,
 					username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
 				},
 			}
@@ -123,7 +146,7 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryFactoryInmem()
+			repo, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -135,12 +158,13 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 			}
 
 			// change total factory by creating a new one
-			factory := newCopperFactory(func() {})
-			factory.Kind = tt.args.factory.GetKind()
-			factory.Level = tt.args.factory.GetLevel()
-			factory.Total = 10
+			factory := infrastructure.NewFactory(
+				tt.args.factory.GetKind(),
+				tt.args.factory.GetLevel(),
+				10,
+			)
 
-			got, err := repo.PatchFactory(&factory, tt.args.username)
+			got, err := repo.PatchFactory(factory, tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -158,43 +182,54 @@ func TestFactoryRepositoryInmem_PatchFactory(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if dataGot[0].GetTotal() != factory.Total {
-				t.Errorf("factory.Total = %v, want %v", dataGot[0].GetTotal(), factory.Total)
+			if dataGot[0].GetTotal() != factory.GetTotal() {
+				t.Errorf("factory.GetTotal() = %v, want %v", dataGot[0].GetTotal(), factory.GetTotal())
 			}
 		})
 	}
 }
 
-func TestFactoryRepositoryInmem_RemoveFactoriesFromUser(t *testing.T) {
+func TestFactoryRepository_RemoveFactoriesFromUser(t *testing.T) {
+	type fields struct {
+		factory infrastructure.Factory
+	}
 	type args struct {
 		username string
 	}
 	type testStruct struct {
-		name string
-		args args
+		name   string
+		fields fields
+		args   args
 	}
 
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "runs",
-			args: args{
-				username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
-			},
-		},
+	tests := []testStruct{
+		func() testStruct {
+			factory := infrastructure.NewFactory(
+				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				10,
+				11,
+			)
+
+			return testStruct{
+				name: "runs",
+				fields: fields{
+					factory: factory,
+				},
+				args: args{
+					username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				},
+			}
+		}(),
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryFactoryInmem()
+			repo, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			// prepare
-			factory := newCopperFactory(func() {})
-			_, err = repo.CreateFactory(&factory, tt.args.username)
+			_, err = repo.CreateFactory(tt.fields.factory, tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -219,9 +254,9 @@ func TestFactoryRepositoryInmem_RemoveFactoriesFromUser(t *testing.T) {
 	}
 }
 
-func TestFactoryRepositoryInmem_RemoveFactory(t *testing.T) {
+func TestFactoryRepository_RemoveFactory(t *testing.T) {
 	type args struct {
-		factory  Factory
+		factory  infrastructure.Factory
 		username string
 	}
 	type testStruct struct {
@@ -231,12 +266,16 @@ func TestFactoryRepositoryInmem_RemoveFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := newCopperFactory(func() {})
+			factory := infrastructure.NewFactory(
+				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				10,
+				11,
+			)
 
 			return testStruct{
 				name: "runs",
 				args: args{
-					factory:  &factory,
+					factory:  factory,
 					username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
 				},
 			}
@@ -244,7 +283,7 @@ func TestFactoryRepositoryInmem_RemoveFactory(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryFactoryInmem()
+			repo, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -275,7 +314,7 @@ func TestFactoryRepositoryInmem_RemoveFactory(t *testing.T) {
 	}
 }
 
-func Test_createRepositoryFactoryInmem(t *testing.T) {
+func Test_createRepositoryFactory(t *testing.T) {
 	tests := []struct {
 		name string
 	}{
@@ -283,14 +322,14 @@ func Test_createRepositoryFactoryInmem(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := createRepositoryFactoryInmem()
+			got, err := createRepositoryFactory()
 			if err != nil {
 				t.Fatal(err)
 				return
 			}
 
 			if got == nil {
-				t.Errorf("createRepositoryFactoryInmem() = %v, want %v", got, nil)
+				t.Errorf("createRepositoryFactory() = %v, want %v", got, nil)
 			}
 		})
 	}

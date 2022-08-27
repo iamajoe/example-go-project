@@ -1,15 +1,17 @@
-package main
+package sqlite
 
 import (
 	"fmt"
 	"math/rand"
 	"os"
 	"testing"
+
+	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
-func TestRepositoryUserSqlite_GetUserByUsername(t *testing.T) {
+func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 	path := fmt.Sprintf("tmp_test_%d.db", rand.Intn(10000))
-	db, err := ConnectSQLite(path)
+	db, err := Connect(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,7 +38,7 @@ func TestRepositoryUserSqlite_GetUserByUsername(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryUserSqlite(db)
+			repo, err := createRepositoryUser(db)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -63,9 +65,9 @@ func TestRepositoryUserSqlite_GetUserByUsername(t *testing.T) {
 	}
 }
 
-func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
+func TestRepositoryUser_CreateUser(t *testing.T) {
 	path := fmt.Sprintf("tmp_test_%d.db", rand.Intn(10000))
-	db, err := ConnectSQLite(path)
+	db, err := Connect(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +75,7 @@ func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
 	defer os.Remove(path)
 
 	type args struct {
-		user User
+		user infrastructure.User
 	}
 	type testStruct struct {
 		name string
@@ -82,9 +84,8 @@ func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			user := User{
-				Username: fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
-			}
+			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
+			user := infrastructure.NewUser(username)
 
 			return testStruct{
 				name: "runs",
@@ -94,11 +95,10 @@ func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, err := createRepositoryUserSqlite(db)
+			repo, err := createRepositoryUser(db)
 			if err != nil {
 				t.Fatal(err)
 			}
-			tt.args.user.userRepository = repo
 
 			got, err := repo.CreateUser(tt.args.user)
 			if err != nil {
@@ -119,16 +119,16 @@ func TestRepositoryUserSqlite_CreateUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if username != tt.args.user.Username {
-				t.Errorf("username = %v, want %v", username, tt.args.user.Username)
+			if username != tt.args.user.GetUsername() {
+				t.Errorf("username = %v, want %v", username, tt.args.user.GetUsername())
 			}
 		})
 	}
 }
 
-func Test_createRepositoryUserSqlite(t *testing.T) {
+func Test_createRepositoryUser(t *testing.T) {
 	path := fmt.Sprintf("tmp_test_%d.db", rand.Intn(10000))
-	db, err := ConnectSQLite(path)
+	db, err := Connect(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,14 +142,14 @@ func Test_createRepositoryUserSqlite(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := createRepositoryUserSqlite(db)
+			got, err := createRepositoryUser(db)
 			if err != nil {
 				t.Fatal(err)
 				return
 			}
 
 			if got == nil {
-				t.Errorf("createRepositoryUserSqlite() = %v, want %v", got, nil)
+				t.Errorf("createRepositoryUser() = %v, want %v", got, nil)
 			}
 		})
 	}

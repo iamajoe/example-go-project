@@ -1,4 +1,4 @@
-package main
+package sqlite
 
 import (
 	"database/sql"
@@ -8,15 +8,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type DBSqlite struct {
+type DB struct {
 	db *sql.DB
 }
 
-func (db *DBSqlite) Close() error {
+func (db *DB) Close() error {
 	return db.db.Close()
 }
 
-func ConnectSQLite(file string) (*DBSqlite, error) {
+func Connect(file string) (*DB, error) {
 	// create the file if doesnt exist
 	if _, err := os.Stat(file); errors.Is(err, os.ErrNotExist) {
 		file, err := os.Create(file)
@@ -31,7 +31,7 @@ func ConnectSQLite(file string) (*DBSqlite, error) {
 		return nil, err
 	}
 
-	return &DBSqlite{db}, nil
+	return &DB{db}, nil
 
 	// defer db.Close()
 
