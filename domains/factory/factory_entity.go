@@ -57,9 +57,10 @@ func (f *Factory) UpgradeToLevel(level int) {
 
 	f.Production = upgradeMap.production
 	f.NextUpgradeTime = upgradeMap.nextUpgradeTime
-	f.NextUpgradeCost["iron"] = upgradeMap.nextUpgradeCost["iron"]
-	f.NextUpgradeCost["copper"] = upgradeMap.nextUpgradeCost["copper"]
-	f.NextUpgradeCost["gold"] = upgradeMap.nextUpgradeCost["gold"]
+
+	for key, val := range upgradeMap.nextUpgradeCost {
+		f.NextUpgradeCost[key] = val
+	}
 
 	f.Level = level
 }

@@ -51,8 +51,8 @@ func TestFactoryRepository_GetByUsername(t *testing.T) {
 				t.Errorf("FactoryRepository.GetByUsername() = %v, want %v", len(got), 1)
 			}
 
-			if got[0].GetKind() != "copper" {
-				t.Errorf("got[0].GetKind() = %v, want %v", got[0].GetKind(), "copper")
+			if got[0].GetKind() != tt.fields.factory.GetKind() {
+				t.Errorf("got[0].GetKind() = %v, want %v", got[0].GetKind(), tt.fields.factory.GetKind())
 			}
 		})
 	}
@@ -110,8 +110,8 @@ func TestFactoryRepository_CreateFactory(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if dataGot[0].GetKind() != "copper" {
-				t.Errorf("got[0].GetKind() = %v, want %v", dataGot[0].GetKind(), "copper")
+			if dataGot[0].GetKind() != tt.args.factory.GetKind() {
+				t.Errorf("got[0].GetKind() = %v, want %v", dataGot[0].GetKind(), tt.args.factory.GetKind())
 			}
 		})
 	}
