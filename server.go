@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -38,4 +40,18 @@ func handleResponse(w http.ResponseWriter, code int, data interface{}, err error
 	// send the response
 	w.WriteHeader(code)
 	w.Write(r)
+}
+
+func initServer(repos Repositories) {
+	sm := http.NewServeMux()
+
+	sm.HandleFunc("/user", reqCreateUser(repos))
+	sm.HandleFunc("/dashboard", reqGetDashboard(repos))
+	sm.HandleFunc("/factory/upgrade", reqUpgradeFactory(repos))
+
+	fmt.Println("listening at :4040")
+	err := http.ListenAndServe(":4040", sm)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 }
