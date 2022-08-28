@@ -3,7 +3,7 @@
 ## Run
 
 ```go
-go run .
+DB_TYPE=sqlite DB_PATH=data.sqlite go run .
 ```
 
 ## Test

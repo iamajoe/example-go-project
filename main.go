@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/joesantosio/simple-game-api/entity"
 	"github.com/joesantosio/simple-game-api/infrastructure/inmem"
@@ -13,22 +12,30 @@ import (
 	"github.com/joesantosio/simple-game-api/interfaces/http_std"
 )
 
-func initRepos() (entity.Repositories, error) {
-	repos, err := inmem.InitRepos()
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("error initializing repos inmem: %v", err))
-	}
+func initRepos(dbType string, dbPath string) (repos entity.Repositories, err error) {
+	switch dbType {
+	case "sqlite":
+		if dbPath == "" {
+			err = errors.New("DB_PATH not provided")
+			break
+		}
 
-	// check if tests, if not, we can setup the sqlite
-	if !strings.Contains(os.Args[0], "/_test/") {
-		db, err := sqlite.Connect("data.sqlite")
+		db, err := sqlite.Connect(dbPath)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("error initializing db sqlite: %v", err))
+			err = errors.New(fmt.Sprintf("error initializing db sqlite: %v", err))
+			break
 		}
 
 		repos, err = sqlite.InitRepos(db)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("error initializing repos sqlite: %v", err))
+			err = errors.New(fmt.Sprintf("error initializing repos sqlite: %v", err))
+			break
+		}
+	default:
+		repos, err = inmem.InitRepos()
+		if err != nil {
+			err = errors.New(fmt.Sprintf("error initializing repos inmem: %v", err))
+			break
 		}
 	}
 
@@ -36,7 +43,7 @@ func initRepos() (entity.Repositories, error) {
 }
 
 func main() {
-	repos, err := initRepos()
+	repos, err := initRepos(os.Getenv("DB_TYPE"), os.Getenv("DB_PATH"))
 	if err != nil {
 		log.Fatal(err)
 		return
