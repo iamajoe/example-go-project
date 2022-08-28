@@ -20,7 +20,7 @@ type Factory struct {
 	NextUpgradeTime time.Duration  `json:"nextUpgradeTime"`
 	NextUpgradeCost map[string]int `json:"nextUpgradeCost"`
 	upgradeMap      map[int]factoryUpgradeMap
-	updCb           func()
+	updCb           func(total int, level int)
 }
 
 func (r *Factory) Start() {
@@ -75,7 +75,7 @@ func (r *Factory) Upgrade() {
 
 	r.Level += 1
 	r.UpgradeToLevel(r.Level)
-	r.updCb()
+	r.updCb(r.Total, r.Level)
 
 	r.IsUpgrade = false
 }

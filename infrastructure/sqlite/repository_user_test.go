@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/joesantosio/simple-game-api/infrastructure"
+	"github.com/joesantosio/simple-game-api/entity"
 )
 
 func TestRepositoryUser_GetUserByUsername(t *testing.T) {
@@ -75,7 +75,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 	defer os.Remove(path)
 
 	type args struct {
-		user infrastructure.User
+		user entity.User
 	}
 	type testStruct struct {
 		name string
@@ -85,7 +85,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 	tests := []testStruct{
 		func() testStruct {
 			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
-			user := infrastructure.NewUser(username)
+			user := newModelUser(username)
 
 			return testStruct{
 				name: "runs",
@@ -100,7 +100,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := repo.CreateUser(tt.args.user)
+			got, err := repo.CreateUser(tt.args.user.GetUsername())
 			if err != nil {
 				t.Fatal(err)
 				return

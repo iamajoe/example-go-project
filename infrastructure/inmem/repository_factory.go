@@ -1,59 +1,78 @@
 package inmem
 
-import "github.com/joesantosio/simple-game-api/infrastructure"
+import "github.com/joesantosio/simple-game-api/entity"
 
-type repositoryFactorySingle struct {
+// ------------------------------
+// model
+
+type modelFactory struct {
 	username string
-	kind     string
-	total    int
-	level    int
+	Kind  string `json:"kind"`
+	Total int    `json:"total"`
+	Level int    `json:"level"`
 }
+
+func (r *modelFactory) GetKind() string {
+	return r.Kind
+}
+func (r *modelFactory) GetTotal() int {
+	return r.Total
+}
+func (r *modelFactory) GetLevel() int {
+	return r.Level
+}
+
+func newModelFactory(username string, kind string, total int, level int) *modelFactory {
+	return &modelFactory{
+		username: username,
+		Kind:  kind,
+		Total: total,
+		Level: level,
+	}
+}
+
+// ------------------------------
+// repository
 
 type repositoryFactory struct {
-	data []*repositoryFactorySingle
+	data []*modelFactory
 }
 
-func (repo *repositoryFactory) GetByUsername(username string) ([]infrastructure.Factory, error) {
-	factories := []infrastructure.Factory{}
+func (repo *repositoryFactory) GetByUsername(username string) ([]entity.Factory, error) {
+	factories := []entity.Factory{}
 	for _, val := range repo.data {
 		if val.username != username {
 			continue
 		}
 
-		factory := infrastructure.NewFactory(val.kind, val.total, val.level)
+		factory := newModelFactory(username, val.Kind, val.Total, val.Level)
 		factories = append(factories, factory)
 	}
 
 	return factories, nil
 }
 
-func (repo *repositoryFactory) CreateFactory(factory infrastructure.Factory, username string) (bool, error) {
-	repo.data = append(repo.data, &repositoryFactorySingle{
-		username: username,
-		kind:     factory.GetKind(),
-		total:    factory.GetTotal(),
-		level:    factory.GetLevel(),
-	})
-
+func (repo *repositoryFactory) CreateFactory(kind string, total int, level int, username string) (bool, error) {
+	repo.data = append(repo.data, newModelFactory(username, kind, total, level))
 	return true, nil
 }
 
-func (repo *repositoryFactory) PatchFactory(factory infrastructure.Factory, username string) (bool, error) {
+func (repo *repositoryFactory) PatchFactory(kind string, username string, total int, level int) (bool, error) {
 	for _, val := range repo.data {
-		if val.username != username {
+		if val.username != username && val.Kind != kind {
 			continue
 		}
 
-		val.kind = factory.GetKind()
-		val.total = factory.GetTotal()
-		val.level = factory.GetLevel()
+		val.Kind = kind
+		val.Total = total
+		val.Level = level
 	}
 
 	return true, nil
 }
 
 func (repo *repositoryFactory) RemoveFactoriesFromUser(username string) (bool, error) {
-	newData := []*repositoryFactorySingle{}
+	newData := []*modelFactory{}
 
 	for _, val := range repo.data {
 		if val.username == username {
@@ -68,11 +87,11 @@ func (repo *repositoryFactory) RemoveFactoriesFromUser(username string) (bool, e
 	return true, nil
 }
 
-func (repo *repositoryFactory) RemoveFactory(factory infrastructure.Factory, username string) (bool, error) {
-	newData := []*repositoryFactorySingle{}
+func (repo *repositoryFactory) RemoveFactory(kind string, username string) (bool, error) {
+	newData := []*modelFactory{}
 
 	for _, val := range repo.data {
-		if val.username == username && val.kind == factory.GetKind() {
+		if val.username == username && val.Kind == kind {
 			continue
 		}
 
@@ -84,9 +103,9 @@ func (repo *repositoryFactory) RemoveFactory(factory infrastructure.Factory, use
 	return true, nil
 }
 
-func createRepositoryFactory() (infrastructure.RepositoryFactory, error) {
+func createRepositoryFactory() (entity.RepositoryFactory, error) {
 	repo := repositoryFactory{
-		data: []*repositoryFactorySingle{},
+		data: []*modelFactory{},
 	}
 
 	return &repo, nil

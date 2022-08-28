@@ -5,12 +5,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/joesantosio/simple-game-api/infrastructure"
+	"github.com/joesantosio/simple-game-api/entity"
 )
 
 func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 	type fields struct {
-		data []*repositoryUserSingle
+		data []*modelUser
 	}
 	type args struct {
 		username string
@@ -28,7 +28,7 @@ func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 			return testStruct{
 				name: "runs",
 				fields: fields{
-					data: []*repositoryUserSingle{{username}},
+					data: []*modelUser{{username}},
 				},
 				args: args{username},
 			}
@@ -55,7 +55,7 @@ func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 
 func TestRepositoryUser_CreateUser(t *testing.T) {
 	type args struct {
-		user infrastructure.User
+		user entity.User
 	}
 	type testStruct struct {
 		name string
@@ -65,7 +65,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 	tests := []testStruct{
 		func() testStruct {
 			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
-			user := infrastructure.NewUser(username)
+			user := newModelUser(username)
 
 			return testStruct{
 				name: "runs",
@@ -77,7 +77,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &repositoryUser{}
 
-			got, err := repo.CreateUser(tt.args.user)
+			got, err := repo.CreateUser(tt.args.user.GetUsername())
 			if err != nil {
 				t.Fatal(err)
 				return

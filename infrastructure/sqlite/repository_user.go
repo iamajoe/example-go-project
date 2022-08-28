@@ -4,19 +4,37 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/joesantosio/simple-game-api/infrastructure"
+	"github.com/joesantosio/simple-game-api/entity"
 )
 
 var (
 	userMutex sync.Mutex
 )
 
+// ------------------------------
+// model
+
+type modelUser struct {
+	Username string `json:"username"`
+}
+
+func (u *modelUser) GetUsername() string {
+	return u.Username
+}
+
+func newModelUser(username string) *modelUser {
+	return &modelUser{username}
+}
+
+// ------------------------------
+// repository
+
 type repositoryUser struct {
 	db *DB
 }
 
-func (repo *repositoryUser) GetUserByUsername(username string) (infrastructure.User, error) {
-	user := infrastructure.NewUser("")
+func (repo *repositoryUser) GetUserByUsername(username string) (entity.User, error) {
+	user := newModelUser("")
 
 	var dbUsername string
 
@@ -28,16 +46,16 @@ func (repo *repositoryUser) GetUserByUsername(username string) (infrastructure.U
 		return user, err
 	}
 
-	user.SetUsername(dbUsername)
+	user.Username = dbUsername
 
 	return user, nil
 }
 
-func (repo *repositoryUser) CreateUser(user infrastructure.User) (bool, error) {
+func (repo *repositoryUser) CreateUser(username string) (bool, error) {
 	userMutex.Lock()
 
 	sts := "INSERT INTO users VALUES(?);"
-	_, err := repo.db.db.Exec(sts, user.GetUsername())
+	_, err := repo.db.db.Exec(sts, username)
 	if err != nil {
 		return false, err
 	}
@@ -47,7 +65,7 @@ func (repo *repositoryUser) CreateUser(user infrastructure.User) (bool, error) {
 	return true, err
 }
 
-func createRepositoryUser(db *DB) (infrastructure.RepositoryUser, error) {
+func createRepositoryUser(db *DB) (entity.RepositoryUser, error) {
 	repo := repositoryUser{db}
 
 	userMutex.Lock()

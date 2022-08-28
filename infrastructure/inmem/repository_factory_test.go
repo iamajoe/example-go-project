@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
-
-	"github.com/joesantosio/simple-game-api/infrastructure"
 )
 
 func TestFactoryRepository_GetByUsername(t *testing.T) {
 	type fields struct {
-		factory infrastructure.Factory
+		factory *modelFactory
 	}
 	type args struct {
 		username string
@@ -23,8 +21,9 @@ func TestFactoryRepository_GetByUsername(t *testing.T) {
 		{
 			name: "runs",
 			fields: fields{
-				factory: infrastructure.NewFactory(
+				factory: newModelFactory(
 					fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+					fmt.Sprintf("tmp_kind_%d", rand.Intn(100000)),
 					10,
 					11,
 				),
@@ -40,7 +39,12 @@ func TestFactoryRepository_GetByUsername(t *testing.T) {
 			}
 
 			// prepare
-			_, err = repo.CreateFactory(tt.fields.factory, tt.args.username)
+			_, err = repo.CreateFactory(
+				tt.fields.factory.GetKind(), 
+				tt.fields.factory.GetTotal(),
+				tt.fields.factory.GetLevel(),
+				tt.args.username,
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -60,7 +64,7 @@ func TestFactoryRepository_GetByUsername(t *testing.T) {
 
 func TestFactoryRepository_CreateFactory(t *testing.T) {
 	type args struct {
-		factory  infrastructure.Factory
+		factory  *modelFactory
 		username string
 	}
 	type testStruct struct {
@@ -70,8 +74,9 @@ func TestFactoryRepository_CreateFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := infrastructure.NewFactory(
+			factory := newModelFactory(
 				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				fmt.Sprintf("tmp_kind_%d", rand.Intn(100000)),
 				10,
 				11,
 			)
@@ -92,7 +97,12 @@ func TestFactoryRepository_CreateFactory(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			got, err := repo.CreateFactory(tt.args.factory, tt.args.username)
+			got, err := repo.CreateFactory(
+				tt.args.factory.GetKind(), 
+				tt.args.factory.GetTotal(),
+				tt.args.factory.GetLevel(),
+				tt.args.username,
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -119,7 +129,7 @@ func TestFactoryRepository_CreateFactory(t *testing.T) {
 
 func TestFactoryRepository_PatchFactory(t *testing.T) {
 	type args struct {
-		factory  infrastructure.Factory
+		factory  *modelFactory
 		username string
 	}
 	type testStruct struct {
@@ -129,8 +139,9 @@ func TestFactoryRepository_PatchFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := infrastructure.NewFactory(
+			factory := newModelFactory(
 				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				fmt.Sprintf("tmp_kind_%d", rand.Intn(100000)),
 				10,
 				11,
 			)
@@ -152,19 +163,25 @@ func TestFactoryRepository_PatchFactory(t *testing.T) {
 			}
 
 			// prepare
-			_, err = repo.CreateFactory(tt.args.factory, tt.args.username)
+			_, err = repo.CreateFactory(
+				tt.args.factory.GetKind(), 
+				tt.args.factory.GetTotal(), 
+				tt.args.factory.GetLevel(), 
+				tt.args.username,
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			// change total factory by creating a new one
-			factory := infrastructure.NewFactory(
-				tt.args.factory.GetKind(),
-				tt.args.factory.GetLevel(),
-				10,
-			)
+			
+			newTotal := 10
 
-			got, err := repo.PatchFactory(factory, tt.args.username)
+			got, err := repo.PatchFactory(
+				tt.args.factory.GetKind(), 
+				tt.args.username,
+				newTotal, 
+				tt.args.factory.GetLevel(), 
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -182,8 +199,8 @@ func TestFactoryRepository_PatchFactory(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if dataGot[0].GetTotal() != factory.GetTotal() {
-				t.Errorf("factory.GetTotal() = %v, want %v", dataGot[0].GetTotal(), factory.GetTotal())
+			if dataGot[0].GetTotal() != newTotal {
+				t.Errorf("newTotal = %v, want %v", dataGot[0].GetTotal(), newTotal)
 			}
 		})
 	}
@@ -191,7 +208,7 @@ func TestFactoryRepository_PatchFactory(t *testing.T) {
 
 func TestFactoryRepository_RemoveFactoriesFromUser(t *testing.T) {
 	type fields struct {
-		factory infrastructure.Factory
+		factory *modelFactory
 	}
 	type args struct {
 		username string
@@ -204,8 +221,9 @@ func TestFactoryRepository_RemoveFactoriesFromUser(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := infrastructure.NewFactory(
+			factory := newModelFactory(
 				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				fmt.Sprintf("tmp_kind_%d", rand.Intn(100000)),
 				10,
 				11,
 			)
@@ -229,7 +247,12 @@ func TestFactoryRepository_RemoveFactoriesFromUser(t *testing.T) {
 			}
 
 			// prepare
-			_, err = repo.CreateFactory(tt.fields.factory, tt.args.username)
+			_, err = repo.CreateFactory(
+				tt.fields.factory.GetKind(), 
+				tt.fields.factory.GetTotal(), 
+				tt.fields.factory.GetLevel(), 
+				tt.args.username,
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -256,7 +279,7 @@ func TestFactoryRepository_RemoveFactoriesFromUser(t *testing.T) {
 
 func TestFactoryRepository_RemoveFactory(t *testing.T) {
 	type args struct {
-		factory  infrastructure.Factory
+		factory  *modelFactory
 		username string
 	}
 	type testStruct struct {
@@ -266,8 +289,9 @@ func TestFactoryRepository_RemoveFactory(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
-			factory := infrastructure.NewFactory(
+			factory := newModelFactory(
 				fmt.Sprintf("tmp_user_%d", rand.Intn(100000)),
+				fmt.Sprintf("tmp_kind_%d", rand.Intn(100000)),
 				10,
 				11,
 			)
@@ -289,12 +313,17 @@ func TestFactoryRepository_RemoveFactory(t *testing.T) {
 			}
 
 			// prepare
-			_, err = repo.CreateFactory(tt.args.factory, tt.args.username)
+			_, err = repo.CreateFactory(
+				tt.args.factory.GetKind(), 
+				tt.args.factory.GetTotal(), 
+				tt.args.factory.GetLevel(), 
+				tt.args.username,
+			)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			got, err := repo.RemoveFactory(tt.args.factory, tt.args.username)
+			got, err := repo.RemoveFactory(tt.args.factory.GetKind(), tt.args.username)
 			if err != nil {
 				t.Fatal(err)
 			}

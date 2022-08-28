@@ -7,7 +7,7 @@ import (
 
 	"github.com/joesantosio/simple-game-api/infrastructure/inmem"
 	"github.com/joesantosio/simple-game-api/infrastructure/sqlite"
-	"github.com/joesantosio/simple-game-api/interfaces/httpd"
+	"github.com/joesantosio/simple-game-api/interfaces/http_std"
 )
 
 func main() {
@@ -34,5 +34,5 @@ func main() {
 
 	defer repos.Close()
 
-	httpd.InitServer(":4040", repos)
+	http_std.InitServer(":4040", repos)
 }

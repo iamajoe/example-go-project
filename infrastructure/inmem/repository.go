@@ -1,12 +1,27 @@
 package inmem
 
-import "github.com/joesantosio/simple-game-api/infrastructure"
+import (
+	"github.com/joesantosio/simple-game-api/entity"
+)
 
-func InitRepos() (repos *infrastructure.Repositories, err error) {
-	closeFn := func() error {
-		return nil
-	}
+type repositories struct {
+	user    entity.RepositoryUser
+	factory entity.RepositoryFactory
+}
 
+func (r *repositories) GetUser() entity.RepositoryUser {
+	return r.user
+}
+
+func (r *repositories) GetFactory() entity.RepositoryFactory {
+	return r.factory
+}
+
+func (r *repositories) Close() error {
+	return nil
+}
+
+func InitRepos() (repos entity.Repositories, err error) {
 	factory, err := createRepositoryFactory()
 	if err != nil {
 		return repos, err
@@ -17,7 +32,5 @@ func InitRepos() (repos *infrastructure.Repositories, err error) {
 		return repos, err
 	}
 
-	repos = infrastructure.NewRepositories(user, factory, closeFn)
-
-	return repos, nil
+	return &repositories{user, factory}, nil
 }

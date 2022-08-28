@@ -1,4 +1,4 @@
-# Simple game API
+# Example Go project
 
 ## Run
 

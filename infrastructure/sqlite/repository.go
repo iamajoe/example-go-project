@@ -3,21 +3,39 @@ package sqlite
 import (
 	"errors"
 
-	"github.com/joesantosio/simple-game-api/infrastructure"
+	"github.com/joesantosio/simple-game-api/entity"
 )
 
-func InitRepos(db *DB) (repos *infrastructure.Repositories, err error) {
-	if db == nil {
-		return repos, errors.New("database didn't came in")
-	}
+type repositories struct {
+	db 		  *DB
+	user    entity.RepositoryUser
+	factory entity.RepositoryFactory
+}
 
-	closeFn := func() error {
-		err := db.Close()
+func (r *repositories) GetUser() entity.RepositoryUser {
+	return r.user
+}
+
+func (r *repositories) GetFactory() entity.RepositoryFactory {
+	return r.factory
+}
+
+func (r *repositories) Close() error {
+	if r.db != nil {
+		err := r.db.Close()
 		if err != nil {
 			return err
 		}
 
-		return nil
+		r.db = nil
+	}
+
+	return nil
+}
+
+func InitRepos(db *DB) (repos entity.Repositories, err error) {
+	if db == nil {
+		return repos, errors.New("database didn't came in")
 	}
 
 	user, err := createRepositoryUser(db)
@@ -30,7 +48,5 @@ func InitRepos(db *DB) (repos *infrastructure.Repositories, err error) {
 		return repos, err
 	}
 
-	repos = infrastructure.NewRepositories(user, factory, closeFn)
-
-	return repos, nil
+	return &repositories{db, user, factory}, nil
 }

@@ -1,21 +1,37 @@
 package inmem
 
-import "github.com/joesantosio/simple-game-api/infrastructure"
+import (
+	"github.com/joesantosio/simple-game-api/entity"
+)
 
-type repositoryUserSingle struct {
-	username string
+// ------------------------------
+// model
+
+type modelUser struct {
+	Username string `json:"username"`
 }
+
+func (u *modelUser) GetUsername() string {
+	return u.Username
+}
+
+func newModelUser(username string) *modelUser {
+	return &modelUser{username}
+}
+
+// ------------------------------
+// repository
 
 type repositoryUser struct {
-	data []*repositoryUserSingle
+	data []*modelUser
 }
 
-func (repo *repositoryUser) GetUserByUsername(username string) (infrastructure.User, error) {
-	user := infrastructure.NewUser("")
+func (repo *repositoryUser) GetUserByUsername(username string) (entity.User, error) {
+	user := newModelUser("")
 
 	for _, val := range repo.data {
-		if val.username == username {
-			user.SetUsername(val.username)
+		if val.GetUsername() == username {
+			user.Username = val.GetUsername()
 			break
 		}
 	}
@@ -23,14 +39,14 @@ func (repo *repositoryUser) GetUserByUsername(username string) (infrastructure.U
 	return user, nil
 }
 
-func (repo *repositoryUser) CreateUser(user infrastructure.User) (bool, error) {
-	repo.data = append(repo.data, &repositoryUserSingle{user.GetUsername()})
+func (repo *repositoryUser) CreateUser(username string) (bool, error) {
+	repo.data = append(repo.data, &modelUser{username})
 	return true, nil
 }
 
-func createRepositoryUser() (infrastructure.RepositoryUser, error) {
+func createRepositoryUser() (entity.RepositoryUser, error) {
 	repo := repositoryUser{
-		data: []*repositoryUserSingle{},
+		data: []*modelUser{},
 	}
 
 	return &repo, nil
