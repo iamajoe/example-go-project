@@ -13,7 +13,7 @@ var (
 	ENABLED_FACTORIES = []string{"iron", "copper", "gold"}
 )
 
-func convertModelToFactory(model entity.Factory) *Factory {
+func convertModelToFactory(model entity.Factory) *factoryEntity {
 	var upgradeMap map[int]factoryUpgradeMap
 	switch model.GetKind() {
 	case "copper":
@@ -53,7 +53,7 @@ func UpgradeUserResource(
 
 	// lets first map the resources totals and parse them into
 	// an interface that knows how to handle extra stuff
-	factories := []*Factory{}
+	factories := []*factoryEntity{}
 	totals := make(map[string]int)
 	for _, res := range factoriesRepo {
 		factory := convertModelToFactory(res)

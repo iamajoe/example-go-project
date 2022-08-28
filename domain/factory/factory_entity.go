@@ -10,7 +10,7 @@ type factoryUpgradeMap struct {
 	nextUpgradeCost map[string]int
 }
 
-type Factory struct {
+type factoryEntity struct {
 	IsRunning       bool           `json:"isRunning"`
 	Kind            string         `json:"kind"`
 	Total           int            `json:"total"`
@@ -23,7 +23,7 @@ type Factory struct {
 	updCb           func(total int, level int)
 }
 
-func (r *Factory) Start() {
+func (r *factoryEntity) Start() {
 	r.IsRunning = true
 
 	if r.Level == 0 {
@@ -35,11 +35,11 @@ func (r *Factory) Start() {
 	r.Loop()
 }
 
-func (r *Factory) Stop() {
+func (r *factoryEntity) Stop() {
 	r.IsRunning = false
 }
 
-func (r *Factory) Loop() {
+func (r *factoryEntity) Loop() {
 	if !r.IsRunning {
 		return
 	}
@@ -49,7 +49,7 @@ func (r *Factory) Loop() {
 	r.Loop()
 }
 
-func (f *Factory) UpgradeToLevel(level int) {
+func (f *factoryEntity) UpgradeToLevel(level int) {
 	upgradeMap, ok := f.upgradeMap[level]
 	if !ok {
 		return
@@ -65,7 +65,7 @@ func (f *Factory) UpgradeToLevel(level int) {
 	f.Level = level
 }
 
-func (r *Factory) Upgrade() {
+func (r *factoryEntity) Upgrade() {
 	if r.Level == 5 || r.IsUpgrade {
 		return
 	}
@@ -80,8 +80,8 @@ func (r *Factory) Upgrade() {
 	r.IsUpgrade = false
 }
 
-func newFactory(kind string, total int, level int, upgradeMap map[int]factoryUpgradeMap) *Factory {
-	resource := Factory{
+func newFactory(kind string, total int, level int, upgradeMap map[int]factoryUpgradeMap) *factoryEntity {
+	resource := factoryEntity{
 		Kind:            kind,
 		Total:           total,
 		Level:           level,
