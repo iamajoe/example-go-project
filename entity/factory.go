@@ -1,15 +1,27 @@
 package entity
 
-type Factory interface {
-	GetKind() string
-	GetTotal() int
-	GetLevel() int
+type Factory struct {
+	ID     int
+	UserID string
+	Kind   string `json:"kind"`
+	Total  int    `json:"total"`
+	Level  int    `json:"level"`
+}
+
+func NewModelFactory(id int, userID string, kind string, total int, level int) *Factory {
+	return &Factory{
+		ID:     id,
+		UserID: userID,
+		Kind:   kind,
+		Total:  total,
+		Level:  level,
+	}
 }
 
 type RepositoryFactory interface {
-	GetByUsername(username string) ([]Factory, error)
-	CreateFactory(kind string, total int, level int, username string) (bool, error)
-	PatchFactory(kind string, username string, total int, level int) (bool, error)
-	RemoveFactoriesFromUser(username string) (bool, error)
-	RemoveFactory(kind string, username string) (bool, error)
+	GetByUserID(userID string) ([]Factory, error)
+	Create(kind string, total int, level int, userID string) (bool, error)
+	Patch(kind string, userID string, total int, level int) (bool, error)
+	RemoveFactoriesFromUser(userID string) (bool, error)
+	Remove(kind string, userID string) (bool, error)
 }

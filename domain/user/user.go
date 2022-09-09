@@ -4,46 +4,46 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/joesantosio/simple-game-api/domain/factory"
-	"github.com/joesantosio/simple-game-api/entity"
-	"github.com/joesantosio/simple-game-api/httperr"
+	"github.com/joesantosio/example-go-project/domain/factory"
+	"github.com/joesantosio/example-go-project/entity"
+	"github.com/joesantosio/example-go-project/httperr"
 )
 
-func CreateUser(username string, userRepo entity.RepositoryUser, factoryRepo entity.RepositoryFactory) (bool, error) {
+func Create(username string, userRepo entity.RepositoryUser, factoryRepo entity.RepositoryFactory) (string, error) {
 	// check if the user was created already
-	if dbUser, _ := userRepo.GetUserByUsername(username); dbUser.GetUsername() == username {
-		return false, httperr.NewError(http.StatusConflict, errors.New("user already exists"))
+	if dbUser, _ := userRepo.GetByUsername(username); dbUser.Username == username {
+		return "", httperr.NewError(http.StatusConflict, errors.New("user already exists"))
 	}
 
-	_, err := userRepo.CreateUser(username)
+	id, err := userRepo.Create(username)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	err = factory.CreateUserFactories(username, userRepo, factoryRepo)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
-	return true, err
+	return id, err
 }
 
-func GetUserByUsername(
-	username string,
+func GetByUserID(
+	userID string,
 	userRepo entity.RepositoryUser,
 ) (entity.User, error) {
-	if len(username) == 0 {
-		return nil, httperr.NewError(http.StatusBadRequest, errors.New("invalid user"))
+	if len(userID) == 0 {
+		return entity.User{}, httperr.NewError(http.StatusBadRequest, errors.New("invalid user"))
 	}
 
-	user, err := userRepo.GetUserByUsername(username)
+	users, err := userRepo.GetByIDs([]string{userID})
 	if err != nil {
-		return user, err
+		return entity.User{}, err
 	}
 
-	if len(user.GetUsername()) == 0 {
-		return user, httperr.NewError(http.StatusBadRequest, errors.New("invalid user"))
+	if len(users) == 0 {
+		return entity.User{}, httperr.NewError(http.StatusBadRequest, errors.New("invalid user"))
 	}
 
-	return user, nil
+	return users[0], nil
 }

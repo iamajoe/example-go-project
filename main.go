@@ -4,14 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
+	"net/http"
 	"os"
 
-	"github.com/joesantosio/simple-game-api/entity"
-	"github.com/joesantosio/simple-game-api/infrastructure/inmem"
-	"github.com/joesantosio/simple-game-api/infrastructure/sqlite"
-	"github.com/joesantosio/simple-game-api/interfaces/http_chi"
-	"github.com/joesantosio/simple-game-api/interfaces/http_std"
+	"github.com/joesantosio/example-go-project/config"
+	"github.com/joesantosio/example-go-project/entity"
+	"github.com/joesantosio/example-go-project/infrastructure/inmem"
+	"github.com/joesantosio/example-go-project/infrastructure/sqlite"
+	"github.com/joesantosio/example-go-project/interfaces/server"
+	serverchi "github.com/joesantosio/example-go-project/interfaces/server_chi"
+	serverstd "github.com/joesantosio/example-go-project/interfaces/server_std"
 )
 
 func initRepos(dbType string, dbPath string) (repos entity.Repositories, err error) {
@@ -45,23 +47,28 @@ func initRepos(dbType string, dbPath string) (repos entity.Repositories, err err
 }
 
 func main() {
-	repos, err := initRepos(os.Getenv("DB_TYPE"), os.Getenv("DB_PATH"))
+	config, err := config.Get(os.Getenv)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	repos, err := initRepos(config.DBType, config.DBPath)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 	defer repos.Close()
 
-	authSecret := os.Getenv("AUTH_SECRET")
-	if authSecret == "" {
-		authSecret = fmt.Sprintf("%d", rand.Intn(100000000))
-	}
+	var r http.Handler
 
 	switch os.Getenv("SERVER_PACKAGE") {
 	case "chi":
-		http_chi.InitServer(":4040", "secret", repos)
+		r = serverchi.GetRouter(config.AuthSecret, repos)
 		break
 	default:
-		http_std.InitServer(":4040", repos)
+		r = serverstd.GetRouter(config.AuthSecret, repos)
 	}
+
+	server.InitServer(":4040", r)
 }

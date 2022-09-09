@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/joesantosio/simple-game-api/entity"
-	"github.com/joesantosio/simple-game-api/httperr"
+	"github.com/joesantosio/example-go-project/entity"
+	"github.com/joesantosio/example-go-project/httperr"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 
 func convertModelToFactory(model entity.Factory) *factoryEntity {
 	var upgradeMap map[int]factoryUpgradeMap
-	switch model.GetKind() {
+	switch model.Kind {
 	case "copper":
 		upgradeMap = getCopperUpgradeMap()
 	case "gold":
@@ -28,25 +28,25 @@ func convertModelToFactory(model entity.Factory) *factoryEntity {
 		return nil
 	}
 
-	return newFactory(model.GetKind(), model.GetTotal(), model.GetLevel(), upgradeMap)
+	return newFactory(model.Kind, model.Total, model.Level, upgradeMap)
 }
 
 func UpgradeUserResource(
-	username string,
+	userID string,
 	kind string,
 	userRepo entity.RepositoryUser,
 	factoryRepo entity.RepositoryFactory,
 ) (bool, error) {
-	user, err := userRepo.GetUserByUsername(username)
+	users, err := userRepo.GetByIDs([]string{userID})
 	if err != nil {
 		return false, err
 	}
 
-	if user == nil {
+	if len(users) == 0 {
 		return false, httperr.NewError(http.StatusNotFound, errors.New("user not found"))
 	}
 
-	factoriesRepo, err := factoryRepo.GetByUsername(username)
+	factoriesRepo, err := factoryRepo.GetByUserID(userID)
 	if err != nil {
 		return false, err
 	}
@@ -61,7 +61,7 @@ func UpgradeUserResource(
 			continue
 		}
 
-		totals[res.GetKind()] = res.GetTotal()
+		totals[res.Kind] = res.Total
 		factories = append(factories, factory)
 	}
 
@@ -78,11 +78,11 @@ func UpgradeUserResource(
 		// setup a callback function to save on the repo when the factory
 		// is upgraded
 		factories[len(factories)-1].updCb = func(total int, level int) {
-			_, err := factoryRepo.PatchFactory(kind, username, total, level)
+			_, err := factoryRepo.Patch(kind, userID, total, level)
 
 			if err != nil {
 				// TODO: should probably have other way to notify the error
-				log.Fatalf("ERR: error patching user %s: %v \n", username, err)
+				log.Fatalf("ERR: error patching user %s: %v \n", userID, err)
 			}
 		}
 
@@ -94,12 +94,12 @@ func UpgradeUserResource(
 }
 
 func CreateUserFactories(
-	username string,
+	userID string,
 	userRepo entity.RepositoryUser,
 	factoryRepo entity.RepositoryFactory,
 ) error {
 	for _, kind := range ENABLED_FACTORIES {
-		_, err := factoryRepo.CreateFactory(kind, 0, 0, username)
+		_, err := factoryRepo.Create(kind, 0, 0, userID)
 		if err != nil {
 			return err
 		}

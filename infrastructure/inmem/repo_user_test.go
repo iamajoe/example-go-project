@@ -5,12 +5,12 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/joesantosio/simple-game-api/entity"
+	"github.com/joesantosio/example-go-project/entity"
 )
 
-func TestRepositoryUser_GetUserByUsername(t *testing.T) {
+func TestRepositoryUser_GetByUsername(t *testing.T) {
 	type fields struct {
-		data []*modelUser
+		data []*entity.User
 	}
 	type args struct {
 		username string
@@ -23,12 +23,13 @@ func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 
 	tests := []testStruct{
 		func() testStruct {
+			id := fmt.Sprintf("tmp_id_%d", rand.Intn(100000))
 			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
 
 			return testStruct{
 				name: "runs",
 				fields: fields{
-					data: []*modelUser{{username}},
+					data: []*entity.User{{id, username}},
 				},
 				args: args{username},
 			}
@@ -39,21 +40,21 @@ func TestRepositoryUser_GetUserByUsername(t *testing.T) {
 			repo := &repositoryUser{
 				data: tt.fields.data,
 			}
-			got, err := repo.GetUserByUsername(tt.args.username)
+			got, err := repo.GetByUsername(tt.args.username)
 
 			if err != nil {
 				t.Fatal(err)
 				return
 			}
 
-			if got.GetUsername() != tt.args.username {
-				t.Errorf("got.GetUsername() = %v, want %v", got.GetUsername(), tt.args.username)
+			if got.Username != tt.args.username {
+				t.Errorf("got.Username = %v, want %v", got.Username, tt.args.username)
 			}
 		})
 	}
 }
 
-func TestRepositoryUser_CreateUser(t *testing.T) {
+func TestRepositoryUser_Create(t *testing.T) {
 	type args struct {
 		user entity.User
 	}
@@ -65,7 +66,7 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 	tests := []testStruct{
 		func() testStruct {
 			username := fmt.Sprintf("tmp_user_%d", rand.Intn(100000))
-			user := newModelUser(username)
+			user := entity.NewModelUser("", username)
 
 			return testStruct{
 				name: "runs",
@@ -77,20 +78,20 @@ func TestRepositoryUser_CreateUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &repositoryUser{}
 
-			got, err := repo.CreateUser(tt.args.user.GetUsername())
+			got, err := repo.Create(tt.args.user.Username)
 			if err != nil {
 				t.Fatal(err)
 				return
 			}
 
-			if got != true {
+			if len(got) == 0 {
 				t.Errorf("RepositoryUser.CreateUser() = %v, want %v", got, true)
 			}
 
 			// run
-			gotUser, err := repo.GetUserByUsername(tt.args.user.GetUsername())
-			if gotUser.GetUsername() != tt.args.user.GetUsername() {
-				t.Errorf("RepositoryUser.GetByUsername() = %v, want %v", gotUser.GetUsername(), tt.args.user.GetUsername())
+			gotUser, err := repo.GetByUsername(tt.args.user.Username)
+			if gotUser.Username != tt.args.user.Username {
+				t.Errorf("RepositoryUser.GetByUsername() = %v, want %v", gotUser.Username, tt.args.user.Username)
 			}
 		})
 	}

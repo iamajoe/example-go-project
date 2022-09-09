@@ -2,6 +2,7 @@ package entity
 
 type Repositories interface {
 	Close() error
-	GetUser()    RepositoryUser
+	GetUser() RepositoryUser
 	GetFactory() RepositoryFactory
+	GetUserToken() RepositoryUserToken
 }

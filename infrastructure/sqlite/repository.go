@@ -3,17 +3,22 @@ package sqlite
 import (
 	"errors"
 
-	"github.com/joesantosio/simple-game-api/entity"
+	"github.com/joesantosio/example-go-project/entity"
 )
 
 type repositories struct {
-	db 		  *DB
-	user    entity.RepositoryUser
-	factory entity.RepositoryFactory
+	db        *DB
+	user      entity.RepositoryUser
+	userToken entity.RepositoryUserToken
+	factory   entity.RepositoryFactory
 }
 
 func (r *repositories) GetUser() entity.RepositoryUser {
 	return r.user
+}
+
+func (r *repositories) GetUserToken() entity.RepositoryUserToken {
+	return r.userToken
 }
 
 func (r *repositories) GetFactory() entity.RepositoryFactory {
@@ -43,10 +48,15 @@ func InitRepos(db *DB) (repos entity.Repositories, err error) {
 		return repos, err
 	}
 
+	userToken, err := createRepositoryUserToken(db)
+	if err != nil {
+		return repos, err
+	}
+
 	factory, err := createRepositoryFactory(db)
 	if err != nil {
 		return repos, err
 	}
 
-	return &repositories{db, user, factory}, nil
+	return &repositories{db, user, userToken, factory}, nil
 }
