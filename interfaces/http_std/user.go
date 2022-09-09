@@ -20,17 +20,17 @@ func reqCreateUser(repos entity.Repositories) func(w http.ResponseWriter, r *htt
 		}
 		err := json.NewDecoder(r.Body).Decode(&userRaw)
 		if err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
 		ok, err := user.CreateUser(userRaw.Username, repos.GetUser(), repos.GetFactory())
 		if err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
-		handleResponse(w, ok)
+		HandleResponse(w, ok)
 	}
 }
 
@@ -44,19 +44,19 @@ func reqGetDashboard(repos entity.Repositories) func(w http.ResponseWriter, r *h
 		username := r.URL.Query().Get("username")
 		user, err := user.GetUserByUsername(username, repos.GetUser())
 		if err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
-		handleResponse(w, user)
+		HandleResponse(w, user)
 	}
 }
 
-func getUserEndpoints(repos entity.Repositories) map[string]http.Handler {
-	endpoints := make(map[string]http.Handler)
+func GetUserEndpoints(repos entity.Repositories) map[string]func(w http.ResponseWriter, r *http.Request) {
+	endpoints := make(map[string]func(w http.ResponseWriter, r *http.Request))
 
-	endpoints["/users/user"] = newEndpointHandler(reqCreateUser(repos))
-	endpoints["/users/dashboard"] = newEndpointHandler(reqGetDashboard(repos))
+	endpoints["/user"] = reqCreateUser(repos)
+	endpoints["/dashboard"] = reqGetDashboard(repos)
 
 	return endpoints
 }

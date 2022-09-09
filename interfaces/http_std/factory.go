@@ -19,30 +19,30 @@ func reqUpgradeFactory(repos entity.Repositories) func(w http.ResponseWriter, r 
 		username := r.URL.Query().Get("username")
 		_, err := user.GetUserByUsername(username, repos.GetUser())
 		if err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
 		var bodyResource map[string]string
 		if err = json.NewDecoder(r.Body).Decode(&bodyResource); err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
 		ok, err := factory.UpgradeUserResource(username, bodyResource["kind"], repos.GetUser(), repos.GetFactory())
 		if err != nil {
-			handleErrResponse(w, err)
+			HandleErrResponse(w, err)
 			return
 		}
 
-		handleResponse(w, ok)
+		HandleResponse(w, ok)
 	}
 }
 
-func getFactoryEndpoints(repos entity.Repositories) map[string]http.Handler {
-	endpoints := make(map[string]http.Handler)
+func GetFactoryEndpoints(repos entity.Repositories) map[string]func(w http.ResponseWriter, r *http.Request) {
+	endpoints := make(map[string]func(w http.ResponseWriter, r *http.Request))
 
-	endpoints["/factory/upgrade"] = newEndpointHandler(reqUpgradeFactory(repos))
+	endpoints["/upgrade"] = reqUpgradeFactory(repos)
 
 	return endpoints
 }

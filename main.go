@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 
 	"github.com/joesantosio/simple-game-api/entity"
 	"github.com/joesantosio/simple-game-api/infrastructure/inmem"
 	"github.com/joesantosio/simple-game-api/infrastructure/sqlite"
+	"github.com/joesantosio/simple-game-api/interfaces/http_chi"
 	"github.com/joesantosio/simple-game-api/interfaces/http_std"
 )
 
@@ -50,7 +52,15 @@ func main() {
 	}
 	defer repos.Close()
 
+	authSecret := os.Getenv("AUTH_SECRET")
+	if authSecret == "" {
+		authSecret = fmt.Sprintf("%d", rand.Intn(100000000))
+	}
+
 	switch os.Getenv("SERVER_PACKAGE") {
+	case "chi":
+		http_chi.InitServer(":4040", "secret", repos)
+		break
 	default:
 		http_std.InitServer(":4040", repos)
 	}

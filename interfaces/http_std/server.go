@@ -15,7 +15,7 @@ type errorCoded interface {
 	StatusCode() int
 }
 
-func handleResponseRaw(w http.ResponseWriter, code int, data interface{}) {
+func HandleResponseRaw(w http.ResponseWriter, code int, data interface{}) {
 	// prepare the response
 	resData := struct {
 		Ok   bool        `json:"ok"`
@@ -31,7 +31,7 @@ func handleResponseRaw(w http.ResponseWriter, code int, data interface{}) {
 
 	r, marshalErr := json.Marshal(resData)
 	if marshalErr != nil {
-		handleErrResponse(w, marshalErr)
+		HandleErrResponse(w, marshalErr)
 		return
 	}
 
@@ -41,11 +41,11 @@ func handleResponseRaw(w http.ResponseWriter, code int, data interface{}) {
 	w.Write(r)
 }
 
-func handleResponse(w http.ResponseWriter, data interface{}) {
-	handleResponseRaw(w, http.StatusOK, data)
+func HandleResponse(w http.ResponseWriter, data interface{}) {
+	HandleResponseRaw(w, http.StatusOK, data)
 }
 
-func handleErrResponse(w http.ResponseWriter, err error) {
+func HandleErrResponse(w http.ResponseWriter, err error) {
 	code := http.StatusInternalServerError
 	if coder, ok := err.(errorCoded); ok {
 		code = coder.StatusCode()
@@ -56,7 +56,7 @@ func handleErrResponse(w http.ResponseWriter, err error) {
 		msg = http.StatusText(code)
 	}
 
-	handleResponseRaw(w, code, msg)
+	HandleResponseRaw(w, code, msg)
 }
 
 type endpointHandler struct {
@@ -65,17 +65,14 @@ type endpointHandler struct {
 func (h *endpointHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.fn(w, r)
 }
-func newEndpointHandler(fn func(w http.ResponseWriter, r *http.Request)) http.Handler {
-	return &endpointHandler{fn}
-}
 
 func setEndpoints(mux *http.ServeMux, repos entity.Repositories) {
-	for key, val := range getUserEndpoints(repos) {
-		mux.Handle(key, val)
+	for key, val := range GetUserEndpoints(repos) {
+		mux.Handle(fmt.Sprintf("/users/%s", key), &endpointHandler{val})
 	}
 
-	for key, val := range getFactoryEndpoints(repos) {
-		mux.Handle(key, val)
+	for key, val := range GetFactoryEndpoints(repos) {
+		mux.Handle(fmt.Sprintf("/factories/%s", key), &endpointHandler{val})
 	}
 }
 

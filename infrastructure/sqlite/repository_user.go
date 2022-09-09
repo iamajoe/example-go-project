@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/joesantosio/simple-game-api/entity"
@@ -38,10 +37,7 @@ func (repo *repositoryUser) GetUserByUsername(username string) (entity.User, err
 
 	var dbUsername string
 
-	// TODO: shouldnt use sprintf but a lib to make sure that we don't have security issues
-	err := repo.db.db.QueryRow(
-		fmt.Sprintf("SELECT username FROM users WHERE username='%s'", username),
-	).Scan(&dbUsername)
+	err := repo.db.db.QueryRow("SELECT username FROM users WHERE username=$1", username).Scan(&dbUsername)
 	if err != nil {
 		return user, err
 	}
@@ -70,7 +66,7 @@ func createRepositoryUser(db *DB) (entity.RepositoryUser, error) {
 
 	userMutex.Lock()
 
-	// TODO: should have an id but for the assessment, no need
+	// TODO: should have an id
 	sts := "CREATE TABLE IF NOT EXISTS users(username TEXT);"
 	_, err := repo.db.db.Exec(sts)
 

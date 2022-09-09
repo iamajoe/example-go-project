@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/joesantosio/simple-game-api/entity"
@@ -48,10 +47,7 @@ type repositoryFactory struct {
 func (repo *repositoryFactory) GetByUsername(username string) ([]entity.Factory, error) {
 	factories := []entity.Factory{}
 
-	// TODO: shouldnt use sprintf but a lib to make sure that we don't have security issues
-	rows, err := repo.db.db.Query(
-		fmt.Sprintf("SELECT kind,total,level FROM factories WHERE username='%s'", username),
-	)
+	rows, err := repo.db.db.Query("SELECT kind,total,level FROM factories WHERE username=$1", username)
 	if err != nil {
 		return nil, err
 	}
