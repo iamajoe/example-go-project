@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	AuthSecret    string
+	Port          string
 	DBType        string
 	DBPath        string
 	ServerPackage string
@@ -27,6 +28,7 @@ func Get(getenv func(string) string) (Config, error) {
 
 	return Config{
 		AuthSecret:    authSecret,
+		Port:          getenv("PORT"),
 		DBType:        getenv("DB_TYPE"),
 		DBPath:        getenv("DB_PATH"),
 		ServerPackage: getenv("SERVER_PACKAGE"),

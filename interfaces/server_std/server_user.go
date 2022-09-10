@@ -42,7 +42,7 @@ func reqGetDashboard(repos entity.Repositories) func(w http.ResponseWriter, r *h
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(acl.AclUserID).(string)
 		if !ok || len(userID) == 0 {
-			err := httperr.NewError(http.StatusForbidden, errors.New("userRoles not set right"))
+			err := httperr.NewError(http.StatusForbidden, errors.New("userID not set right"))
 			server.HandleErrResponse(w, err)
 			return
 		}

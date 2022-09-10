@@ -62,13 +62,15 @@ func main() {
 
 	var r http.Handler
 
-	switch os.Getenv("SERVER_PACKAGE") {
+	switch config.ServerPackage {
 	case "chi":
 		r = serverchi.GetRouter(config.AuthSecret, repos)
-		break
 	default:
 		r = serverstd.GetRouter(config.AuthSecret, repos)
 	}
 
-	server.InitServer(":4040", r)
+	fmt.Printf("DB type: %s\n", config.DBType)
+	fmt.Printf("Server package: %s\n", config.ServerPackage)
+
+	server.InitServer(":"+config.Port, r)
 }
